@@ -1,0 +1,31 @@
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+
+export const protect = async (req, res, next) => {
+  let token;
+
+  // Check if token exists in header
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // Extract token
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET_USER_ID);
+
+      // Get user from DB
+      req.user = await User.findById(decoded.id).select("-password");
+
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Token invalid", error });
+    }
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+};
