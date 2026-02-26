@@ -2,27 +2,29 @@ import mongoose from "mongoose";
 
 const restaurantSchema = new mongoose.Schema(
   {
-    owner: {
+    ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
-    name: {
+    image: {
+      type: String,
+    },
+    restaurant_name: {
       type: String,
       required: true,
     },
 
-    address: {
+    restaurant_address: {
       type: String,
       required: true,
     },
 
-    contact: {
+    restaurant_contact: {
       type: String,
     },
 
-    deliveryPincodes: [String],
+    restaurant_deliveryPincodes: [String],
 
     preparationTime: {
       type: Number,
@@ -32,6 +34,15 @@ const restaurantSchema = new mongoose.Schema(
     isOpen: {
       type: Boolean,
       default: true,
+    },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+
+    totalRatings: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true },

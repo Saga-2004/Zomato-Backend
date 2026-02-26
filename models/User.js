@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
     },
     // savedAddresses: [addressSchema],
     isBlocked: { type: Boolean, default: false }, // For Admin control
+    availabilityStatus: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    }, // For delivery partners
   },
   { timestamps: true },
 );

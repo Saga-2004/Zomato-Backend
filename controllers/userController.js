@@ -12,7 +12,7 @@ const generateToken = (id) => {
 // REGISTER
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone } = await req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -59,6 +59,36 @@ export const loginUser = async (req, res) => {
     } else {
       res.status(401).json({ message: "Invalid email or password" });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE AVAILABILITY (for delivery partners, but allowed for any logged-in user)
+export const updateAvailability = async (req, res) => {
+  try {
+    const { availabilityStatus } = req.body;
+
+    const allowed = ["online", "offline"];
+    if (!allowed.includes(availabilityStatus)) {
+      return res.status(400).json({
+        message: "Invalid availability status. Use 'online' or 'offline'.",
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.availabilityStatus = availabilityStatus;
+    await user.save();
+
+    res.json({
+      message: "Availability updated successfully",
+      availabilityStatus: user.availabilityStatus,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
