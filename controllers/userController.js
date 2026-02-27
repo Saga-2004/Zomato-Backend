@@ -27,6 +27,7 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       phone,
+      availabilityStatus: "online",
     });
 
     res.status(201).json({
@@ -34,6 +35,7 @@ export const registerUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      availabilityStatus: user.availabilityStatus,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -49,17 +51,48 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Set availability status to online when they log in
+      user.availabilityStatus = "online";
+      await user.save();
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        availabilityStatus: user.availabilityStatus,
         token: generateToken(user._id),
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// LOGOUT
+export const logoutUser = async (req, res) => {
+  try {
+    console.log("Logout called for user:", req.user._id);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { availabilityStatus: "offline" },
+      { new: true },
+    );
+
+    console.log("logout update result:", updatedUser);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Logged out successfully",
+      availabilityStatus: updatedUser.availabilityStatus,
+    });
+  } catch (error) {
+    console.log("logout error", error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -158,12 +158,19 @@ export const claimDeliveryOrder = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.deliveryPartner && order.deliveryPartner.toString() !== req.user._id.toString()) {
-      return res.status(400).json({ message: "Order already assigned to another partner" });
+    if (
+      order.deliveryPartner &&
+      order.deliveryPartner.toString() !== req.user._id.toString()
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Order already assigned to another partner" });
     }
 
     if (order.status !== "Ready for Pickup") {
-      return res.status(400).json({ message: "Only 'Ready for Pickup' orders can be claimed" });
+      return res
+        .status(400)
+        .json({ message: "Only 'Ready for Pickup' orders can be claimed" });
     }
 
     order.deliveryPartner = req.user._id;
@@ -295,11 +302,7 @@ export const getRestaurantAnalytics = async (req, res) => {
           },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", "Delivered"] },
-                "$totalAmount",
-                0,
-              ],
+              $cond: [{ $eq: ["$status", "Delivered"] }, "$totalAmount", 0],
             },
           },
           totalRefunds: {
@@ -354,11 +357,7 @@ export const getRestaurantAnalytics = async (req, res) => {
           },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", "Delivered"] },
-                "$totalAmount",
-                0,
-              ],
+              $cond: [{ $eq: ["$status", "Delivered"] }, "$totalAmount", 0],
             },
           },
           totalRefunds: {
@@ -440,6 +439,26 @@ export const cancelOrder = async (req, res) => {
     await order.save();
 
     res.json({ message: "Order cancelled successfully", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const cancelPendingOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.paymentStatus !== "Pending") {
+      return res.status(400).json({ message: "Order already paid" });
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Pending order deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -12,6 +12,7 @@ import menuRoutes from "./routes/menuRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 connectDB(); // Connect to database
 
@@ -35,6 +36,7 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/ratings", ratingRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Basic Route
 app.get("/", (req, res) => {

@@ -10,9 +10,11 @@ import {
   getDeliveryOrders,
   getRestaurantAnalytics,
   claimDeliveryOrder,
+  // cancelPendingOrder, // removed to avoid runtime error
 } from "../controllers/orderController.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 import { cancelOrder } from "../controllers/orderController.js";
+import { markOrderAsPaid } from "../controllers/cartController.js";
 
 const router = express.Router();
 
@@ -47,6 +49,9 @@ router.get(
 
 router.put("/:id/cancel", protect, authorizeRoles("customer"), cancelOrder);
 
+//Create New API to Confirm Payment
+router.put("/:id/pay", protect, markOrderAsPaid);
+
 // Admin assigns delivery partner
 router.put(
   "/:id/assign",
@@ -78,5 +83,12 @@ router.put(
   authorizeRoles("delivery_partner"),
   claimDeliveryOrder,
 );
+
+// router.delete(
+//   "/:id/cancel-pending",
+//   protect,
+//   authorizeRoles("customer"),
+//   cancelPendingOrder,
+// );
 
 export default router;

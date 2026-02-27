@@ -58,6 +58,9 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Paid", "Refunded"],
       default: "Pending",
     },
+    paymentId: {
+      type: String,
+    },
   },
   { timestamps: true },
 );

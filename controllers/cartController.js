@@ -92,8 +92,12 @@ export const checkout = async (req, res) => {
       !Array.isArray(restaurant.restaurant_deliveryPincodes) ||
       !restaurant.restaurant_deliveryPincodes.includes(pincode)
     ) {
+      // console.log(Array.isArray(restaurant.restaurant_deliveryPincodes));
+      // console.log(restaurant.restaurant_deliveryPincodes.includes(pincode));
+
       return res.status(400).json({
-        message: "Restaurant does not deliver to this pincode",
+        message:
+          "From chechOut API Restaurant does not deliver to this pincode",
       });
     }
 
@@ -135,18 +139,33 @@ export const checkout = async (req, res) => {
       totalAmount -= discount;
     }
 
+    // const order = await Order.create({
+    //   user: req.user._id,
+    //   restaurant: cart.restaurant,
+    //   items: orderItems,
+    //   totalAmount,
+    //   pincode,
+    // });
+
+    // await Cart.deleteOne({ user: req.user._id });
+
+    // res.status(201).json({
+    //   order,
+    //   discountApplied: discount,
+    // });
+
     const order = await Order.create({
       user: req.user._id,
       restaurant: cart.restaurant,
       items: orderItems,
       totalAmount,
       pincode,
+      paymentStatus: "Pending", // 🔥 NEW FIELD
     });
 
-    await Cart.deleteOne({ user: req.user._id });
-
     res.status(201).json({
-      order,
+      orderId: order._id,
+      totalAmount,
       discountApplied: discount,
     });
   } catch (error) {
@@ -208,6 +227,30 @@ export const getCartSummary = async (req, res) => {
       discountApplied: discount,
       totalPayable,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const markOrderAsPaid = async (req, res) => {
+  try {
+    const { paymentId } = req.body;
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.paymentStatus = "Paid";
+    order.paymentId = paymentId;
+
+    await order.save();
+
+    // 🔥 Now delete cart after successful payment
+    await Cart.deleteOne({ user: req.user._id });
+
+    res.json({ message: "Order marked as paid" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
