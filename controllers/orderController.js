@@ -449,11 +449,18 @@ export const cancelPendingOrder = async (req, res) => {
     const order = await Order.findById(req.params.id);
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      // Idempotent: if order doesn't exist, consider it successfully cancelled
+      return res.json({ message: "Order not found or already deleted" });
+    }
+
+    // ensure user is cancelling their own order
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     if (order.paymentStatus !== "Pending") {
-      return res.status(400).json({ message: "Order already paid" });
+      // Already paid, don't delete - just return success
+      return res.json({ message: "Order already processed, cleanup skipped" });
     }
 
     await Order.findByIdAndDelete(req.params.id);

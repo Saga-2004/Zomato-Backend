@@ -10,7 +10,7 @@ import {
   getDeliveryOrders,
   getRestaurantAnalytics,
   claimDeliveryOrder,
-  // cancelPendingOrder, // removed to avoid runtime error
+  cancelPendingOrder, // customer cancels payment-pending orders
 } from "../controllers/orderController.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 import { cancelOrder } from "../controllers/orderController.js";
@@ -84,11 +84,11 @@ router.put(
   claimDeliveryOrder,
 );
 
-// router.delete(
-//   "/:id/cancel-pending",
-//   protect,
-//   authorizeRoles("customer"),
-//   cancelPendingOrder,
-// );
+router.delete(
+  "/:id/cancel-pending",
+  protect,
+  authorizeRoles("customer"),
+  cancelPendingOrder,
+);
 
 export default router;
