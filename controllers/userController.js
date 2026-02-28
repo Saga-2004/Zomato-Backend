@@ -126,3 +126,50 @@ export const updateAvailability = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// UPDATE PROFILE (name/phone/address/saved addresses)
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, address, savedAddresses } = req.body || {};
+
+    const user = await User.findById(req.user._id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (typeof name === "string" && name.trim() !== "") {
+      user.name = name.trim();
+    }
+
+    if (typeof phone === "string") {
+      user.phone = phone.trim();
+    }
+
+    if (typeof address === "string") {
+      user.address = address.trim();
+    }
+
+    if (savedAddresses && typeof savedAddresses === "object") {
+      user.savedAddresses = {
+        home:
+          typeof savedAddresses.home === "string"
+            ? savedAddresses.home.trim()
+            : user.savedAddresses?.home,
+        work:
+          typeof savedAddresses.work === "string"
+            ? savedAddresses.work.trim()
+            : user.savedAddresses?.work,
+      };
+    }
+
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json(userObj);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

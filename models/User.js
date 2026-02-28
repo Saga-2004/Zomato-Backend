@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema(
       enum: ["customer", "admin", "restaurant_owner", "delivery_partner"],
       default: "customer",
     },
-    // savedAddresses: [addressSchema],
+    address: { type: String },
+    savedAddresses: {
+      home: { type: String },
+      work: { type: String },
+    },
     isBlocked: { type: Boolean, default: false }, // For Admin control
     availabilityStatus: {
       type: String,

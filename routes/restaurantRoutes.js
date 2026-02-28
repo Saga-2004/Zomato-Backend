@@ -4,6 +4,7 @@ import upload from "../middleware/uploadMiddleware.js"; // adjust path if needed
 import {
   createRestaurant,
   getRestaurants,
+  getRestaurantById,
 } from "../controllers/restaurantController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
@@ -20,5 +21,6 @@ router.post(
 );
 
 router.get("/", getRestaurants);
+router.get("/:id", getRestaurantById);
 
 export default router;
