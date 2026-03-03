@@ -8,26 +8,33 @@ import Coupon from "../models/Coupon.js";
 export const addToCart = async (req, res) => {
   try {
     const { menuItemId, quantity } = req.body;
-
     const menuItem = await MenuItem.findById(menuItemId);
-
     if (!menuItem) {
       return res.status(404).json({ message: "Item not found" });
     }
-
     let cart = await Cart.findOne({ user: req.user._id });
-
     if (!cart) {
+      // No cart, create new
       cart = await Cart.create({
         user: req.user._id,
         restaurant: menuItem.restaurant,
         items: [{ menuItem: menuItemId, quantity }],
       });
     } else {
-      cart.items.push({ menuItem: menuItemId, quantity });
-      await cart.save();
+      // If restaurant is different, clear cart and start new
+      if (cart.restaurant.toString() !== menuItem.restaurant.toString()) {
+        await Cart.deleteOne({ user: req.user._id });
+        cart = await Cart.create({
+          user: req.user._id,
+          restaurant: menuItem.restaurant,
+          items: [{ menuItem: menuItemId, quantity }],
+        });
+      } else {
+        // Same restaurant, add item
+        cart.items.push({ menuItem: menuItemId, quantity });
+        await cart.save();
+      }
     }
-
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,16 +75,24 @@ export const removeFromCart = async (req, res) => {
 export const checkout = async (req, res) => {
   try {
     const { pincode, couponCode } = req.body;
-
+    const pin = String(pincode);
     const cart = await Cart.findOne({ user: req.user._id }).populate(
       "items.menuItem",
     );
+    // console.log("Cart: ", cart);
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
     const restaurant = await Restaurant.findById(cart.restaurant);
+
+    // console.log("Incoming pincode:", pincode);
+    // console.log("Restaurant", restaurant);
+
+    // console.log("Restaurant pincodes:", restaurant.restaurant_deliveryPincodes);
+    // console.log("Cart restaurant:", cart.restaurant);
+    // console.log("Restaurant found:", restaurant ? true : false);
 
     if (!restaurant) {
       // Clean up stale cart pointing to a deleted/invalid restaurant
@@ -90,11 +105,8 @@ export const checkout = async (req, res) => {
 
     if (
       !Array.isArray(restaurant.restaurant_deliveryPincodes) ||
-      !restaurant.restaurant_deliveryPincodes.includes(pincode)
+      !restaurant.restaurant_deliveryPincodes.includes(pin)
     ) {
-      // console.log(Array.isArray(restaurant.restaurant_deliveryPincodes));
-      // console.log(restaurant.restaurant_deliveryPincodes.includes(pincode));
-
       return res.status(400).json({
         message:
           "From chechOut API Restaurant does not deliver to this pincode",

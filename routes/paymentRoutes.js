@@ -1,6 +1,7 @@
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { log } from "console";
 
 const router = express.Router();
 
@@ -17,8 +18,12 @@ router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
 
+    if (!amount) {
+      return res.status(400).json({ message: "Amount is required" });
+    }
+
     const options = {
-      amount: amount * 100, // rupees → paise
+      amount: Math.round(Number(amount) * 100), // rupees → paise
       currency: "INR",
       receipt: "receipt_" + Date.now(),
     };
@@ -28,7 +33,9 @@ router.post("/create-order", async (req, res) => {
     res.status(200).json(order);
   } catch (error) {
     console.error("Create Order Error:", error);
-    res.status(500).json({ message: "Order creation failed" });
+    res
+      .status(500)
+      .json({ message: "Order creation failed", error: error.message });
   }
 });
 

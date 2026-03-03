@@ -74,8 +74,8 @@ export const toggleBlockUser = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("user", "name email")
-      .populate("restaurant", "name");
+      .populate("user", "name email phone")
+      .populate("restaurant", "restaurant_name");
 
     res.json(orders);
   } catch (error) {
@@ -186,11 +186,7 @@ export const getAdminAnalytics = async (req, res) => {
           },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", "Delivered"] },
-                "$totalAmount",
-                0,
-              ],
+              $cond: [{ $eq: ["$status", "Delivered"] }, "$totalAmount", 0],
             },
           },
           totalRefunds: {
@@ -244,11 +240,7 @@ export const getAdminAnalytics = async (req, res) => {
           },
           totalRevenue: {
             $sum: {
-              $cond: [
-                { $eq: ["$status", "Delivered"] },
-                "$totalAmount",
-                0,
-              ],
+              $cond: [{ $eq: ["$status", "Delivered"] }, "$totalAmount", 0],
             },
           },
           totalRefunds: {
