@@ -57,6 +57,7 @@ export const loginUser = async (req, res) => {
 
       res.json({
         _id: user._id,
+        isBlocked: user.isBlocked,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -74,14 +75,14 @@ export const loginUser = async (req, res) => {
 // LOGOUT
 export const logoutUser = async (req, res) => {
   try {
-    console.log("Logout called for user:", req.user._id);
+    // console.log("Logout called for user:", req.user._id);
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { availabilityStatus: "offline" },
       { new: true },
     );
 
-    console.log("logout update result:", updatedUser);
+    // console.log("logout update result:", updatedUser);
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });

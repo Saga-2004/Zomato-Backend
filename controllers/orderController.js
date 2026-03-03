@@ -41,7 +41,8 @@ export const createOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
-      .populate("restaurant", "name address")
+      .populate("restaurant", "restaurant_name restaurant_address")
+      .populate("user", "name phone address")
       .sort({ createdAt: -1 });
 
     res.json(orders);
@@ -63,6 +64,7 @@ export const getRestaurantOrders = async (req, res) => {
 
     const orders = await Order.find({ restaurant: restaurant._id })
       .populate("user", "name phone")
+      .populate("restaurant", "restaurant_name address")
       .sort({ createdAt: -1 });
 
     res.json(orders);
@@ -140,7 +142,8 @@ export const getDeliveryOrders = async (req, res) => {
         { deliveryPartner: null, status: "Ready for Pickup" },
       ],
     })
-      .populate("restaurant", "name address")
+      .populate("restaurant", "restaurant_name restaurant_address")
+      .populate("user", "name phone address")
       .sort({ createdAt: -1 });
 
     res.json(orders);
