@@ -11,7 +11,7 @@ export const addMenuItem = async (req, res) => {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    const { name, category, price, isAvailable } = req.body;
+    const { name, category, price, isAvailable, variants } = req.body;
 
     let imageUrl = "";
 
@@ -20,17 +20,34 @@ export const addMenuItem = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const item = await MenuItem.create({
+    let variantsArray = [];
+    let itemData = {
       restaurant: restaurant._id,
       name,
       category,
-      price,
       image: imageUrl,
       isAvailable:
         typeof isAvailable === "string"
           ? isAvailable === "true"
           : Boolean(isAvailable),
-    });
+    };
+
+    if (variants) {
+      try {
+        variantsArray = JSON.parse(variants);
+        if (!Array.isArray(variantsArray)) variantsArray = [];
+      } catch {
+        variantsArray = [];
+      }
+    }
+
+    if (variantsArray.length > 0) {
+      itemData.variants = variantsArray;
+    } else {
+      itemData.price = price;
+    }
+
+    const item = await MenuItem.create(itemData);
 
     res.status(201).json(item);
   } catch (error) {
@@ -84,7 +101,7 @@ export const updateMenuItem = async (req, res) => {
       return res.status(404).json({ message: "Menu item not found" });
     }
 
-    const { name, category, price, isAvailable } = req.body;
+    const { name, category, price, isAvailable, variants } = req.body;
 
     if (name != null) item.name = name;
     if (category != null) item.category = category;
@@ -94,6 +111,15 @@ export const updateMenuItem = async (req, res) => {
         typeof isAvailable === "string"
           ? isAvailable === "true"
           : Boolean(isAvailable);
+    }
+    if (variants != null) {
+      try {
+        const parsed =
+          typeof variants === "string" ? JSON.parse(variants) : variants;
+        item.variants = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        item.variants = [];
+      }
     }
 
     if (req.file) {

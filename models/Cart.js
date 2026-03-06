@@ -11,6 +11,18 @@ const cartItemSchema = new mongoose.Schema({
     required: true,
     default: 1,
   },
+  variantIdx: {
+    type: Number,
+    default: null,
+  },
+  variantName: {
+    type: String,
+    default: null,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
 });
 
 const cartSchema = new mongoose.Schema(

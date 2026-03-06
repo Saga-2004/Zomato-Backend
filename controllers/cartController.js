@@ -5,12 +5,23 @@ import Restaurant from "../models/Restaurant.js";
 import Coupon from "../models/Coupon.js";
 
 // Add item to cart
+
 export const addToCart = async (req, res) => {
   try {
-    const { menuItemId, quantity } = req.body;
+    const { menuItemId, quantity = 1, variantIdx = null } = req.body;
     const menuItem = await MenuItem.findById(menuItemId);
     if (!menuItem) {
       return res.status(404).json({ message: "Item not found" });
+    }
+    let price = menuItem.price;
+    let variantName = null;
+    if (
+      variantIdx !== null &&
+      Array.isArray(menuItem.variants) &&
+      menuItem.variants[variantIdx]
+    ) {
+      price = menuItem.variants[variantIdx].price;
+      variantName = menuItem.variants[variantIdx].name;
     }
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
@@ -18,7 +29,9 @@ export const addToCart = async (req, res) => {
       cart = await Cart.create({
         user: req.user._id,
         restaurant: menuItem.restaurant,
-        items: [{ menuItem: menuItemId, quantity }],
+        items: [
+          { menuItem: menuItemId, quantity, variantIdx, variantName, price },
+        ],
       });
     } else {
       // If restaurant is different, clear cart and start new
@@ -27,11 +40,19 @@ export const addToCart = async (req, res) => {
         cart = await Cart.create({
           user: req.user._id,
           restaurant: menuItem.restaurant,
-          items: [{ menuItem: menuItemId, quantity }],
+          items: [
+            { menuItem: menuItemId, quantity, variantIdx, variantName, price },
+          ],
         });
       } else {
         // Same restaurant, add item
-        cart.items.push({ menuItem: menuItemId, quantity });
+        cart.items.push({
+          menuItem: menuItemId,
+          quantity,
+          variantIdx,
+          variantName,
+          price,
+        });
         await cart.save();
       }
     }
@@ -41,13 +62,11 @@ export const addToCart = async (req, res) => {
   }
 };
 
-// Get cart
 export const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate(
       "items.menuItem",
     );
-
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -116,12 +135,13 @@ export const checkout = async (req, res) => {
     let totalAmount = 0;
 
     const orderItems = cart.items.map((item) => {
-      totalAmount += item.menuItem.price * item.quantity;
-
+      // Use stored price (variant or single)
+      totalAmount += item.price * item.quantity;
       return {
         name: item.menuItem.name,
         quantity: item.quantity,
-        price: item.menuItem.price,
+        price: item.price,
+        variantName: item.variantName,
       };
     });
 

@@ -21,10 +21,22 @@ const menuItemSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Single price (for backward compatibility), or use variants
     price: {
       type: Number,
-      required: true,
+      required: function () {
+        // Only require price if variants is empty or not present
+        return !this.variants || this.variants.length === 0;
+      },
     },
+
+    // Variants: array of { name, price }
+    variants: [
+      {
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
 
     isAvailable: {
       type: Boolean,
