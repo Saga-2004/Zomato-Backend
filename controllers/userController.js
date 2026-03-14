@@ -1,6 +1,74 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { sendResetEmail, sendWelcomeEmail } from "../config/emailConfig.js";
+
+// FORGOT PASSWORD
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found with this email" });
+    }
+
+    // Generate raw token
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    console.log(rawToken);
+
+    // Hash the token before saving to DB
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    await user.save();
+
+    // Send raw token in URL (not hashed)
+    const resetURL = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
+
+    await sendResetEmail(user.email, resetURL);
+
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// RESET PASSWORD
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Hash the incoming token to match what's in DB
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }, // token must not be expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Set new password
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful. You can now log in." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Generate Token
 const generateToken = (id) => {
@@ -29,6 +97,11 @@ export const registerUser = async (req, res) => {
       phone,
       availabilityStatus: "online",
     });
+
+    // Send welcome email (non-blocking — won't crash signup if email fails)
+    sendWelcomeEmail(user.email, user.name).catch((err) =>
+      console.error("Welcome email failed:", err.message),
+    );
 
     res.status(201).json({
       _id: user._id,

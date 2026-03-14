@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       enum: ["online", "offline"],
       default: "offline",
     }, // For delivery partners
+
+    // 🔴 NEW: Forgot Password fields
+    resetPasswordToken: { type: String },
+    resetPasswordExpire: { type: Date },
   },
   { timestamps: true },
 );

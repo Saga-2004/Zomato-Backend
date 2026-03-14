@@ -5,6 +5,8 @@ import {
   logoutUser,
   updateAvailability,
   updateProfile,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -25,4 +27,6 @@ router.put("/profile", protect, updateProfile);
 // Update availability status (primarily for delivery partners)
 router.put("/profile/availability", protect, updateAvailability);
 
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 export default router;
