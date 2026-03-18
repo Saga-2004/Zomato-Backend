@@ -274,6 +274,20 @@ export const markOrderAsPaid = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    if (["Cancelled", "Returned", "Refunded"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Cannot capture payment for cancelled/refunded orders",
+      });
+    }
+
+    if (order.paymentStatus === "Paid") {
+      return res.json({ message: "Order already marked as paid", order });
+    }
+
     order.paymentStatus = "Paid";
     order.paymentId = paymentId;
 
@@ -283,6 +297,39 @@ export const markOrderAsPaid = async (req, res) => {
     await Cart.deleteOne({ user: req.user._id });
 
     res.json({ message: "Order marked as paid" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const markOrderAsPending = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    if (["Cancelled", "Returned", "Refunded"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Cannot update payment status for cancelled/refunded orders",
+      });
+    }
+
+    if (order.paymentStatus === "Pending") {
+      return res.json({ message: "Order already pending", order });
+    }
+
+    order.paymentStatus = "Pending";
+    order.paymentId = undefined;
+
+    await order.save();
+
+    res.json({ message: "Order marked as pending", order });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

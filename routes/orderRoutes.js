@@ -14,7 +14,10 @@ import {
 } from "../controllers/orderController.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 import { cancelOrder } from "../controllers/orderController.js";
-import { markOrderAsPaid } from "../controllers/cartController.js";
+import {
+  markOrderAsPaid,
+  markOrderAsPending,
+} from "../controllers/cartController.js";
 
 const router = express.Router();
 
@@ -51,6 +54,7 @@ router.put("/:id/cancel", protect, authorizeRoles("customer"), cancelOrder);
 
 //Create New API to Confirm Payment
 router.put("/:id/pay", protect, markOrderAsPaid);
+router.put("/:id/payment-pending", protect, markOrderAsPending);
 
 // Admin assigns delivery partner
 router.put(
