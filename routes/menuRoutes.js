@@ -7,6 +7,7 @@ import {
   getOwnerMenu,
   updateMenuItem,
   deleteMenuItem,
+  searchMenuItems,
 } from "../controllers/menuController.js";
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -22,12 +23,7 @@ router.post(
 );
 
 // Restaurant owner gets all their menu items (including unavailable)
-router.get(
-  "/owner",
-  protect,
-  authorizeRoles("restaurant_owner"),
-  getOwnerMenu,
-);
+router.get("/owner", protect, authorizeRoles("restaurant_owner"), getOwnerMenu);
 
 // Restaurant owner updates a menu item
 router.put(
@@ -45,6 +41,9 @@ router.delete(
   authorizeRoles("restaurant_owner"),
   deleteMenuItem,
 );
+
+// Customer searches menu items
+router.get("/search", searchMenuItems);
 
 // Customer views menu
 router.get("/:restaurantId", getRestaurantMenu);

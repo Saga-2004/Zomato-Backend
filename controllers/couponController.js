@@ -10,7 +10,14 @@ export const createCoupon = async (req, res) => {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    const { code, discountPercent, maxDiscount, validTill } = req.body;
+    const {
+      code,
+      discountPercent,
+      maxDiscount,
+      validTill,
+      minOrderAmount,
+      maxUses,
+    } = req.body;
 
     const coupon = await Coupon.create({
       restaurant: restaurant._id,
@@ -18,6 +25,8 @@ export const createCoupon = async (req, res) => {
       discountPercent,
       maxDiscount,
       validTill,
+      minOrderAmount: Number(minOrderAmount) || 0,
+      maxUses: Number.isFinite(Number(maxUses)) ? Number(maxUses) : null,
     });
 
     res.status(201).json(coupon);

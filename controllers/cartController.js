@@ -145,6 +145,13 @@ export const checkout = async (req, res) => {
       };
     });
 
+    if (totalAmount <= 0) {
+      return res.status(400).json({
+        message:
+          "Unable to calculate subtotal. Please remove items and add them again.",
+      });
+    }
+
     let discount = 0;
 
     if (couponCode) {
@@ -160,6 +167,16 @@ export const checkout = async (req, res) => {
 
       if (coupon.validTill < new Date()) {
         return res.status(400).json({ message: "Coupon expired" });
+      }
+
+      if (coupon.maxUses != null && coupon.usedCount >= coupon.maxUses) {
+        return res.status(400).json({ message: "Coupon usage limit reached" });
+      }
+
+      if (coupon.minOrderAmount && totalAmount < coupon.minOrderAmount) {
+        return res.status(400).json({
+          message: `max amount should be ${coupon.minOrderAmount} for applying coupon`,
+        });
       }
 
       discount = (totalAmount * coupon.discountPercent) / 100;
@@ -194,6 +211,13 @@ export const checkout = async (req, res) => {
       pincode,
       paymentStatus: "Pending", // 🔥 NEW FIELD
     });
+
+    if (couponCode) {
+      await Coupon.updateOne(
+        { code: couponCode.toUpperCase(), restaurant: cart.restaurant },
+        { $inc: { usedCount: 1 } },
+      );
+    }
 
     res.status(201).json({
       orderId: order._id,
@@ -231,8 +255,17 @@ export const getCartSummary = async (req, res) => {
     let subtotal = 0;
 
     cart.items.forEach((item) => {
-      subtotal += item.menuItem.price * item.quantity;
+      const itemPrice =
+        typeof item.price === "number" ? item.price : item.menuItem?.price || 0;
+      subtotal += itemPrice * item.quantity;
     });
+
+    if (subtotal <= 0) {
+      return res.status(400).json({
+        message:
+          "Unable to calculate subtotal. Please remove items and add them again.",
+      });
+    }
 
     let discount = 0;
 
@@ -243,12 +276,28 @@ export const getCartSummary = async (req, res) => {
         isActive: true,
       });
 
-      if (coupon && coupon.validTill >= new Date()) {
-        discount = (subtotal * coupon.discountPercent) / 100;
+      if (!coupon) {
+        return res.status(400).json({ message: "Invalid coupon" });
+      }
 
-        if (discount > coupon.maxDiscount) {
-          discount = coupon.maxDiscount;
-        }
+      if (coupon.validTill < new Date()) {
+        return res.status(400).json({ message: "Coupon expired" });
+      }
+
+      if (coupon.maxUses != null && coupon.usedCount >= coupon.maxUses) {
+        return res.status(400).json({ message: "Coupon usage limit reached" });
+      }
+
+      if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
+        return res.status(400).json({
+          message: `max amount should be ${coupon.minOrderAmount} for applying coupon`,
+        });
+      }
+
+      discount = (subtotal * coupon.discountPercent) / 100;
+
+      if (discount > coupon.maxDiscount) {
+        discount = coupon.maxDiscount;
       }
     }
 

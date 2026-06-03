@@ -157,3 +157,37 @@ export const deleteMenuItem = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Search menu items (public, for customers)
+export const searchMenuItems = async (req, res) => {
+  try {
+    const { q, pincode } = req.query;
+
+    if (!q || !String(q).trim()) {
+      return res.json([]);
+    }
+
+    const query = String(q).trim();
+    const regex = new RegExp(query, "i");
+
+    const items = await MenuItem.find({
+      isAvailable: true,
+      $or: [{ name: regex }, { category: regex }],
+    }).populate(
+      "restaurant",
+      "restaurant_name restaurant_address restaurant_deliveryPincodes image",
+    );
+
+    const filtered = pincode
+      ? items.filter((item) =>
+          item.restaurant?.restaurant_deliveryPincodes?.includes(
+            String(pincode),
+          ),
+        )
+      : items;
+
+    res.json(filtered);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

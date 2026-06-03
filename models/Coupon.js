@@ -24,6 +24,21 @@ const couponSchema = new mongoose.Schema(
       required: true,
     },
 
+    minOrderAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    maxUses: {
+      type: Number,
+      default: null,
+    },
+
+    usedCount: {
+      type: Number,
+      default: 0,
+    },
+
     validTill: {
       type: Date,
       required: true,

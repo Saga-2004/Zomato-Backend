@@ -16,7 +16,7 @@ export const sendResetEmail = async (toEmail, resetURL) => {
   const transporter = createTransporter(); // ✅ created fresh each time
 
   const mailOptions = {
-    from: `"Tomato 🍅" <${process.env.EMAIL_USER}>`,
+    from: `"LetsEat 🍽️" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: "Password Reset Request",
     html: `
@@ -24,7 +24,7 @@ export const sendResetEmail = async (toEmail, resetURL) => {
         <div style="background: linear-gradient(135deg, #ef4444, #f97316); padding: 32px 36px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 10px; height: 10px; border-radius: 50%; background: white;"></div>
-            <span style="font-size: 24px; font-weight: 900; color: white;">Tomato</span>
+            <span style="font-size: 24px; font-weight: 900; color: white;">LetsEat</span>
           </div>
           <h1 style="color: white; font-size: 24px; font-weight: 900; margin: 20px 0 6px;">Password Reset</h1>
           <p style="color: rgba(255,255,255,0.85); font-size: 14px; margin: 0;">You requested a password reset.</p>
@@ -43,7 +43,7 @@ export const sendResetEmail = async (toEmail, resetURL) => {
         </div>
         <div style="padding: 20px 36px; border-top: 1px solid #EDE8DF; text-align: center;">
           <p style="font-size: 12px; color: #9C9088; margin: 0;">
-            © Tomato — <a href="${process.env.FRONTEND_URL}" style="color: #ef4444; text-decoration: none;">tomato.app</a>
+            © LetsEat — <a href="${process.env.FRONTEND_URL}" style="color: #ef4444; text-decoration: none;">letseat.app</a>
           </p>
         </div>
       </div>
@@ -57,9 +57,9 @@ export const sendWelcomeEmail = async (toEmail, name) => {
   const transporter = createTransporter(); // ✅ created fresh each time
 
   const mailOptions = {
-    from: `"Tomato 🍅" <${process.env.EMAIL_USER}>`,
+    from: `"LetsEat 🍽️" <${process.env.EMAIL_USER}>`,
     to: toEmail,
-    subject: "Welcome to Tomato! 🎉",
+    subject: "Welcome to LetsEat! 🎉",
     html: `
       <div style="font-family: Georgia, serif; max-width: 480px; margin: auto; background: #FFFDF9; border: 1px solid #EDE8DF; border-radius: 16px; overflow: hidden;">
         
@@ -67,7 +67,7 @@ export const sendWelcomeEmail = async (toEmail, name) => {
         <div style="background: linear-gradient(135deg, #ef4444, #f97316); padding: 32px 36px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 10px; height: 10px; border-radius: 50%; background: white; opacity: 0.9;"></div>
-            <span style="font-size: 24px; font-weight: 900; color: white; letter-spacing: -0.5px;">Tomato</span>
+            <span style="font-size: 24px; font-weight: 900; color: white; letter-spacing: -0.5px;">LetsEat</span>
           </div>
           <h1 style="color: white; font-size: 26px; font-weight: 900; margin: 20px 0 6px;">
             Welcome, ${name}! 🎉
@@ -81,7 +81,7 @@ export const sendWelcomeEmail = async (toEmail, name) => {
         <div style="padding: 32px 36px;">
           <p style="font-size: 15px; color: #4A3F34; line-height: 1.7; margin: 0 0 24px;">
             Hi <strong>${name}</strong>, we're thrilled to have you on board! 
-            Here's what you can do on Tomato:
+            Here's what you can do on LetsEat:
           </p>
 
           <!-- Features -->
@@ -116,7 +116,7 @@ export const sendWelcomeEmail = async (toEmail, name) => {
         <div style="padding: 20px 36px; border-top: 1px solid #EDE8DF; text-align: center;">
           <p style="font-size: 12px; color: #9C9088; margin: 0;">
             You're receiving this because you created an account at
-            <a href="${process.env.FRONTEND_URL}" style="color: #ef4444; text-decoration: none; font-weight: 600;">Tomato</a>.
+            <a href="${process.env.FRONTEND_URL}" style="color: #ef4444; text-decoration: none; font-weight: 600;">LetsEat</a>.
           </p>
         </div>
 

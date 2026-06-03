@@ -1,4 +1,4 @@
-# Zomato Clone Backend
+# LetsEat Backend
 
 Node.js + Express backend for a multi-role food ordering platform. This API handles authentication, restaurant/menu management, cart and orders, coupons, ratings, admin operations, delivery assignment, email notifications, and Razorpay payment verification.
 
@@ -205,7 +205,7 @@ GET /
 
 Response:
 
-Zomato Clone API is running...
+LetsEat API is running...
 
 ## Common Issues
 

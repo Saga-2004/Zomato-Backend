@@ -1,3 +1,6 @@
+import dns from "dns";
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -40,7 +43,7 @@ app.use("/api/payment", paymentRoutes);
 
 // Basic Route
 app.get("/", (req, res) => {
-  res.send("Zomato Clone API is running...");
+  res.send("LetsEat API is running...");
 });
 
 app.listen(process.env.PORT, (err) => {
