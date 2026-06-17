@@ -18,11 +18,24 @@ import {
   markOrderAsPaid,
   markOrderAsPending,
 } from "../controllers/cartController.js";
-
+import { body, validationResult } from "express-validator";
 const router = express.Router();
-
+// Validation for order creation
+const validateCreateOrder = [
+  body('restaurantId').isMongoId().withMessage('Invalid restaurantId'),
+  body('items').isArray({ min: 1 }).withMessage('Items must be a non-empty array'),
+  body('totalAmount').isFloat({ gt: 0 }).withMessage('Total amount must be greater than 0'),
+  body('pincode').notEmpty().withMessage('Pincode is required'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array().map(e => e.msg) });
+    }
+    next();
+  },
+];
 //customer placed order
-router.post("/", protect, createOrder);
+router.post("/", protect, validateCreateOrder, createOrder);
 
 //Users shows their placed orders.
 router.get("/my-orders", protect, getMyOrders);

@@ -45,6 +45,9 @@ app.use("/api/payment", paymentRoutes);
 app.get("/", (req, res) => {
   res.send("LetsEat API is running...");
 });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.listen(process.env.PORT, (err) => {
   if (err) {
