@@ -7,13 +7,16 @@ import {
   removeFromCart,
   getCartSummary,
 } from "../controllers/cartController.js";
+import { authorizeRoles } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, addToCart);
-router.get("/", protect, getCart);
-router.delete("/:itemId", protect, removeFromCart);
-router.post("/checkout", protect, checkout);
-router.post("/summary", protect, getCartSummary);
+const customerOnly = [protect, authorizeRoles("customer")];
+
+router.post("/", ...customerOnly, addToCart);
+router.get("/", ...customerOnly, getCart);
+router.delete("/:itemId", ...customerOnly, removeFromCart);
+router.post("/checkout", ...customerOnly, checkout);
+router.post("/summary", ...customerOnly, getCartSummary);
 
 export default router;

@@ -19,7 +19,9 @@ const menuItemSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
+      trim: true,
     },
+    isVeg: { type: Boolean, default: true },
 
     // Single price (for backward compatibility), or use variants
     price: {
@@ -37,6 +39,18 @@ const menuItemSchema = new mongoose.Schema(
         price: { type: Number, required: true },
       },
     ],
+    description: { type: String, maxlength: 300, trim: true },
+    spiceLevel: {
+      type: String,
+      enum: ["mild", "medium", "spicy"],
+      default: "mild",
+    },
+    tags: { type: [String], validate: [(value) => value.length <= 8, "Maximum 8 tags"] },
+    allergens: {
+      type: [String],
+      validate: [(value) => value.length <= 8, "Maximum 8 allergens"],
+    },
+    aiGenerated: { type: Boolean, default: false },
 
     isAvailable: {
       type: Boolean,
@@ -45,5 +59,10 @@ const menuItemSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+menuItemSchema.index({ restaurant: 1, isAvailable: 1 });
+menuItemSchema.index({ isVeg: 1, isAvailable: 1 });
+menuItemSchema.index({ category: 1, isAvailable: 1 });
+menuItemSchema.index({ name: "text", description: "text", tags: "text" });
 
 export default mongoose.model("MenuItem", menuItemSchema);

@@ -13,6 +13,15 @@ export const addToCart = async (req, res) => {
     if (!menuItem) {
       return res.status(404).json({ message: "Item not found" });
     }
+    if (!menuItem.isAvailable) {
+      return res.status(400).json({ message: "Item is currently unavailable" });
+    }
+    const restaurant = await Restaurant.findById(menuItem.restaurant).select(
+      "isOpen",
+    );
+    if (!restaurant || !restaurant.isOpen) {
+      return res.status(400).json({ message: "Restaurant is currently closed" });
+    }
     let price = menuItem.price;
     let variantName = null;
     if (

@@ -162,7 +162,7 @@ export const logoutUser = async (req, res) => {
     }
 
     res.json({
-      message: "Logged out successfully",
+      message: "Logged out",
       availabilityStatus: updatedUser.availabilityStatus,
     });
   } catch (error) {

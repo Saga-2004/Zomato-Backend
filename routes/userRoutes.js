@@ -53,6 +53,7 @@ const authLimiter = rateLimit({
 
 router.post("/register", authLimiter, validateRegister, registerUser);
 router.post("/login", authLimiter, validateLogin, loginUser);
+router.post("/logout", protect, logoutUser);
 
 
 // Get current user profile
