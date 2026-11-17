@@ -169,6 +169,17 @@ npm start
 
 The app starts from server.js and listens on PORT.
 
+## Portfolio Demo Data
+
+The demo seed creates fictional LetsEat restaurants, owners, and menus for portfolio testing. Set `DEMO_OWNER_PASSWORD` in `Backend/.env`, then run:
+
+```bash
+npm run seed:demo -- --dry-run
+npm run seed:demo -- --confirm
+```
+
+Use `--reset-demo` to remove only this script's demo owners, restaurants, and menus, and `--fix-other-categories` to classify existing menu items currently using `other`. Add `--dry-run` to either flag to preview changes without database writes or image uploads. Non-local MongoDB writes require `--confirm`. This is DEMO data created for portfolio purposes.
+
 ## Auth and Access Control
 
 - Auth middleware expects Bearer JWT token.
